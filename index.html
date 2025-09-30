@@ -2,18 +2,53 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Simulador de Compras</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tienda Poco Fulbo</title>
   <link rel="stylesheet" href="css/styles.css">
-  <script src="js/main.js"></script>
+  <script defer src="js/main.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Simulador de Compras</h1>
-    <p>
-      Este simulador permite seleccionar productos desde consola y calcular el total de la compra. 
-      La interacción se realiza mediante <b>prompt</b>, <b>alert</b> y la consola de JS.
-    </p>
-    <footer>Entrega 1 - Ezequiel Villalba</footer>
+  <header>
+    <div class="header-container">
+      <h1>⚽ Tienda Poco Fulbo</h1>
+      <div class="cart-icon">
+        <span>🛒</span>
+        <span id="cart-count" class="cart-count">0</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="products-section">
+      <h2>Productos Disponibles</h2>
+      <div id="products-container" class="products-grid">
+        <!-- Los productos se generan aca -->
+      </div>
+    </section>
+
+    <section class="cart-section">
+      <h2>Carrito de Compras</h2>
+      <div id="cart-container" class="cart-container">
+        <p class="empty-cart">El carrito está vacío</p>
+      </div>
+      <div class="cart-total">
+        <h3>Total: $<span id="cart-total">0</span></h3>
+        <button id="clear-cart-btn" class="btn-clear">Vaciar Carrito</button>
+        <button id="checkout-btn" class="btn-checkout">Finalizar Compra</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h2>🎉 ¡Compra Exitosa!</h2>
+      <p id="modal-message"></p>
+      <button id="modal-close-btn" class="btn-primary">Cerrar</button>
+    </div>
   </div>
+
+  <footer>
+    <p>Segunda Entrega - Ezequiel Villalba</p>
+  </footer>
 </body>
 </html>
