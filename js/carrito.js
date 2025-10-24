@@ -1,35 +1,5 @@
-// Clase Producto
-class Producto {
-  constructor(id, nombre, precio, stock, icono) {
-    this.id = id;
-    this.nombre = nombre;
-    this.precio = precio;
-    this.stock = stock;
-    this.icono = icono;
-  }
-
-  reducirStock() {
-    if (this.stock > 0) {
-      this.stock--;
-      return true;
-    }
-    return false;
-  }
-
-  aumentarStock() {
-    this.stock++;
-  }
-}
-
-// Array de productos
-const productos = [
-  new Producto(1, "Camiseta Poco Fulbo", 5000, 10, "👕"),
-  new Producto(2, "Short Oficial", 3500, 15, "🩳"),
-  new Producto(3, "Pelota", 7000, 8, "⚽")
-];
-
 // Recuperar carrito del localStorage o inicializar vacío
-const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
 // Función para guardar carrito en localStorage
 function guardarCarrito() {
@@ -50,7 +20,7 @@ function calcularTotal() {
 // Función para actualizar el total en pantalla
 function actualizarTotal() {
   const totalElemento = document.getElementById("cart-total");
-  totalElemento.textContent = calcularTotal();
+  totalElemento.textContent = calcularTotal().toLocaleString('es-AR');
 }
 
 // Función para imprimir productos en el HTML
@@ -58,14 +28,14 @@ function imprimirProductos() {
   const contenedor = document.getElementById("products-container");
   contenedor.innerHTML = "";
 
-  for (const producto of productos) {
+  productos.forEach(producto => {
     const card = document.createElement("div");
     card.className = "product-card";
 
     card.innerHTML = `
       <div class="product-icon">${producto.icono}</div>
       <h3>${producto.nombre}</h3>
-      <p class="product-price">$${producto.precio}</p>
+      <p class="product-price">$${producto.precio.toLocaleString('es-AR')}</p>
       <p class="product-stock">Stock: ${producto.stock}</p>
       <button id="btn-${producto.id}" class="btn-add" ${producto.stock === 0 ? 'disabled' : ''}>
         ${producto.stock === 0 ? 'Sin Stock' : 'Agregar al Carrito'}
@@ -76,7 +46,7 @@ function imprimirProductos() {
 
     const boton = document.getElementById(`btn-${producto.id}`);
     boton.addEventListener("click", () => agregarAlCarrito(producto));
-  }
+  });
 }
 
 // Función para agregar producto al carrito
@@ -94,14 +64,26 @@ function agregarAlCarrito(producto) {
     actualizarContadorCarrito();
     actualizarTotal();
     actualizarBotones();
+
+    // Notificación con Toastify
+    Toastify({
+      text: `${producto.nombre} agregado al carrito`,
+      duration: 2000,
+      gravity: "top",
+      position: "right",
+      style: {
+        background: "linear-gradient(to right, #667eea, #764ba2)",
+      }
+    }).showToast();
   }
 }
 
 // Función para eliminar producto del carrito
 function eliminarDelCarrito(index, productoId) {
+  const itemEliminado = carrito[index];
   carrito.splice(index, 1);
   
-  const producto = productos.find(p => p.id === productoId);
+  const producto = obtenerProductoPorId(productoId);
   if (producto) {
     producto.aumentarStock();
   }
@@ -112,6 +94,17 @@ function eliminarDelCarrito(index, productoId) {
   actualizarContadorCarrito();
   actualizarTotal();
   actualizarBotones();
+
+  // Notificación con Toastify
+  Toastify({
+    text: `${itemEliminado.nombre} eliminado del carrito`,
+    duration: 2000,
+    gravity: "top",
+    position: "right",
+    style: {
+      background: "#ff4757",
+    }
+  }).showToast();
 }
 
 // Función para imprimir el carrito en el HTML
@@ -132,7 +125,7 @@ function imprimirCarrito() {
     cartItem.innerHTML = `
       <div class="cart-item-info">
         <div class="cart-item-name">${item.nombre}</div>
-        <div class="cart-item-price">$${item.precio}</div>
+        <div class="cart-item-price">$${item.precio.toLocaleString('es-AR')}</div>
       </div>
       <button class="btn-remove" id="remove-${index}">Eliminar</button>
     `;
@@ -146,20 +139,47 @@ function imprimirCarrito() {
 
 // Función para vaciar el carrito
 function vaciarCarrito() {
-  carrito.forEach(item => {
-    const producto = productos.find(p => p.id === item.id);
-    if (producto) {
-      producto.aumentarStock();
+  if (carrito.length === 0) {
+    return;
+  }
+
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: "Se eliminarán todos los productos del carrito",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#667eea',
+    cancelButtonColor: '#ff4757',
+    confirmButtonText: 'Sí, vaciar',
+    cancelButtonText: 'Cancelar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      carrito.forEach(item => {
+        const producto = obtenerProductoPorId(item.id);
+        if (producto) {
+          producto.aumentarStock();
+        }
+      });
+
+      carrito.length = 0;
+      guardarCarrito();
+      imprimirProductos();
+      imprimirCarrito();
+      actualizarContadorCarrito();
+      actualizarTotal();
+      actualizarBotones();
+
+      Toastify({
+        text: "Carrito vaciado",
+        duration: 2000,
+        gravity: "top",
+        position: "right",
+        style: {
+          background: "#ff4757",
+        }
+      }).showToast();
     }
   });
-
-  carrito.length = 0;
-  guardarCarrito();
-  imprimirProductos();
-  imprimirCarrito();
-  actualizarContadorCarrito();
-  actualizarTotal();
-  actualizarBotones();
 }
 
 // Función para finalizar la compra
@@ -169,24 +189,25 @@ function finalizarCompra() {
   }
 
   const total = calcularTotal();
-  const modal = document.getElementById("modal");
-  const mensaje = document.getElementById("modal-message");
 
-  mensaje.textContent = `Total de la compra: $${total}. ¡Gracias por tu compra!`;
-  modal.style.display = "block";
+  Swal.fire({
+    title: '¡Compra Exitosa! 🎉',
+    html: `
+      <p>Total de la compra: <strong>$${total.toLocaleString('es-AR')}</strong></p>
+      <p>¡Gracias por tu compra en Poco Fulbo!</p>
+    `,
+    icon: 'success',
+    confirmButtonColor: '#667eea',
+    confirmButtonText: 'Cerrar'
+  });
 
   carrito.length = 0;
   guardarCarrito();
+  imprimirProductos();
   imprimirCarrito();
   actualizarContadorCarrito();
   actualizarTotal();
   actualizarBotones();
-}
-
-// Función para cerrar el modal
-function cerrarModal() {
-  const modal = document.getElementById("modal");
-  modal.style.display = "none";
 }
 
 // Función para actualizar el estado de los botones
@@ -203,40 +224,40 @@ function actualizarBotones() {
   }
 }
 
-// Inicializar la aplicación
-function inicializar() {
-  imprimirProductos();
-  
+// Función para restaurar el stock al cargar la página
+function restaurarStockDesdeCarrito() {
   if (carrito.length > 0) {
     carrito.forEach(item => {
-      const producto = productos.find(p => p.id === item.id);
+      const producto = obtenerProductoPorId(item.id);
       if (producto && producto.stock > 0) {
         producto.reducirStock();
       }
     });
-    imprimirProductos();
-    imprimirCarrito();
   }
+}
 
+// Inicializar la aplicación
+async function inicializar() {
+  // Cargar productos desde JSON
+  await cargarProductos();
+
+  // Restaurar stock basado en el carrito guardado
+  restaurarStockDesdeCarrito();
+
+  // Renderizar productos y carrito
+  imprimirProductos();
+  imprimirCarrito();
   actualizarContadorCarrito();
   actualizarTotal();
   actualizarBotones();
 
+  // Event listeners
   const botonVaciar = document.getElementById("clear-cart-btn");
   botonVaciar.addEventListener("click", vaciarCarrito);
 
   const botonCheckout = document.getElementById("checkout-btn");
   botonCheckout.addEventListener("click", finalizarCompra);
-
-  const botonCerrarModal = document.getElementById("modal-close-btn");
-  botonCerrarModal.addEventListener("click", cerrarModal);
-
-  const modal = document.getElementById("modal");
-  modal.addEventListener("click", function(event) {
-    if (event.target === modal) {
-      cerrarModal();
-    }
-  });
 }
 
+// Iniciar cuando el DOM esté listo
 inicializar();

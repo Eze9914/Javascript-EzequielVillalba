@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "nombre": "Camiseta Poco Fulbo",
+    "precio": 5000,
+    "stock": 10,
+    "icono": "👕"
+  },
+  {
+    "id": 2,
+    "nombre": "Short Oficial",
+    "precio": 3500,
+    "stock": 15,
+    "icono": "🩳"
+  },
+  {
+    "id": 3,
+    "nombre": "Pelota",
+    "precio": 7000,
+    "stock": 8,
+    "icono": "⚽"
+  },
+  {
+    "id": 4,
+    "nombre": "Medias Deportivas",
+    "precio": 1500,
+    "stock": 20,
+    "icono": "🧦"
+  },
+  {
+    "id": 5,
+    "nombre": "Botines",
+    "precio": 12000,
+    "stock": 5,
+    "icono": "👟"
+  },
+  {
+    "id": 6,
+    "nombre": "Guantes de Arquero",
+    "precio": 8500,
+    "stock": 7,
+    "icono": "🧤"
+  }
+]
